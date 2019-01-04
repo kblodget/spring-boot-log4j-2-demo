@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+       <Property name="LOG_PATTERN">%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %p %m%n</Property>
+     %highlight{%d{ ISO8601 } [%t] %-5level: %msg%n%throwable}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=black}
+     <Property name="CONSOLE_LOG_PATTERN">%style{%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}}{white} %highlight{%-5level }{FATAL=red, ERROR=red, WARN=yellow, INFO=blue, DEBUG=green, TRACE=white} [%style{%t}{bright,blue}] %style{%c{1.}}{bright,yellow}: %msg%n%throwable</Property>
+    <Property name="COLLECTION_PATTERN">log%X{year}%X{month}</Property>
+  </Properties>
+  <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+         <PatternLayout pattern="${CONSOLE_LOG_PATTERN}" />
+        </Console>
+
+        <!-- MongoDB Appender -->
+        <NoSql name="DatabaseAppender">
+          <MongoDb databaseName="logs" collectionName="applicationLogs" server="127.0.0.1" 
+            port="27017" username="root" password="" />
+        </NoSql>
+
+        <!-- Rolling File Appender -->
+        <RollingFile name="FileAppender" fileName="logs/log4j2-demo.log"
+                     filePattern="logs/log4j2-demo-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" />
+                <SizeBasedTriggeringPolicy size="10MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+        <AsyncLogger name="com.example.log4j2demo" level="debug"
+                     additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="DatabaseAppender"/>
+            <AppenderRef ref="FileAppender" />
+        </AsyncLogger>
+
+        <Root level="info">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="DatabaseAppender"/>
+            <AppenderRef ref="FileAppender" />
+        </Root>
+    </Loggers>
+</Configuration>
